@@ -1,0 +1,164 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Get_blob_content_using_path_(V2)": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "azureblob"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/v2/datasets/@{encodeURIComponent(encodeURIComponent('AccountNameFromSettings'))}/GetFileContentByPath",
+                    "queries": {
+                        "path": "@{split(triggerBody()?['subject'], '/')?[4]}/@{split(triggerBody()?['subject'], '/')?[6]}",
+                        "queryParametersSingleEncoded": true,
+                        "inferContentType": true
+                    }
+                },
+                "runAfter": {}
+            },
+            "List_destination_folder_for_Existing_files": {
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "sharepointonline"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://microsoft.sharepoint.com/teams/Marks&SpencerTeam'))}/folders/@{encodeURIComponent('%252fShared%2bDocuments%252fAzureTesting')}"
+                },
+                "runAfter": {
+                    "Get_blob_content_using_path_(V2)": [
+                        "Succeeded"
+                    ]
+                },
+                "metadata": {
+                    "%252fShared%2bDocuments%252fAzureTesting": "/Shared Documents/AzureTesting"
+                }
+            },
+            "Filter_The_Destination_to_see_if_File_already_exists": {
+                "type": "Query",
+                "inputs": {
+                    "from": "@body('List_destination_folder_for_Existing_files')",
+                    "where": "@equals(item()?['Name'], split(triggerBody()?['subject'], '/')?[6])"
+                },
+                "runAfter": {
+                    "List_destination_folder_for_Existing_files": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Select_Top_Matched_File_in_Destination": {
+                "type": "Compose",
+                "inputs": "@first(body('Filter_array'))",
+                "runAfter": {
+                    "Filter_The_Destination_to_see_if_File_already_exists": [
+                        "Succeeded"
+                    ]
+                }
+            },
+            "Condition": {
+                "type": "If",
+                "expression": {
+                    "and": [
+                        {
+                            "equals": [
+                                "@empty(body('Filter_array'))",
+                                false
+                            ]
+                        }
+                    ]
+                },
+                "actions": {
+                    "Update_file": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "referenceName": "sharepointonline"
+                                }
+                            },
+                            "method": "put",
+                            "body": "@body('Get_blob_content_using_path_(V2)')",
+                            "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://microsoft.sharepoint.com/teams/Marks&SpencerTeam'))}/files/@{encodeURIComponent(encodeURIComponent(outputs('Select_Top_Matched_File_in_Destination')['Path']))}"
+                        },
+                        "runAfter": {}
+                    }
+                },
+                "runAfter": {
+                    "Select_Top_Matched_File_in_Destination": [
+                        "Succeeded"
+                    ]
+                },
+                "else": {
+                    "actions": {
+                        "Create_file": {
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "referenceName": "sharepointonline"
+                                    }
+                                },
+                                "method": "post",
+                                "body": "@body('Get_blob_content_using_path_(V2)')",
+                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://microsoft.sharepoint.com/teams/Marks&SpencerTeam'))}/files",
+                                "queries": {
+                                    "folderPath": "/Shared Documents/AzureTesting",
+                                    "name": "@{split(triggerBody()?['subject'],'/')?[6]}",
+                                    "queryParametersSingleEncoded": true
+                                }
+                            },
+                            "runAfter": {},
+                            "runtimeConfiguration": {
+                                "contentTransfer": {
+                                    "transferMode": "Chunked"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "triggers": {
+            "When_a_resource_event_occurs": {
+                "type": "ApiConnectionWebhook",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "referenceName": "azureeventgrid"
+                        }
+                    },
+                    "body": {
+                        "properties": {
+                            "topic": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/resourceGroups/rg-logicappslifecycle-mns/providers/Microsoft.Storage/storageAccounts/mnstesting",
+                            "destination": {
+                                "endpointType": "webhook",
+                                "properties": {
+                                    "endpointUrl": "@{listCallbackUrl()}"
+                                }
+                            },
+                            "filter": {
+                                "includedEventTypes": [
+                                    "Microsoft.Storage.BlobCreated"
+                                ]
+                            }
+                        }
+                    },
+                    "path": "/subscriptions/@{encodeURIComponent('52eb3891-6f09-4350-8707-4dc848cba302')}/providers/@{encodeURIComponent('Microsoft.Storage.StorageAccounts')}/resource/eventSubscriptions",
+                    "queries": {
+                        "x-ms-api-version": "2017-09-15-preview"
+                    }
+                },
+                "splitOn": "@triggerBody()"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {}
+    },
+    "kind": "Stateful"
+}

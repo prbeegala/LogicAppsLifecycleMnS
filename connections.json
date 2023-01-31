@@ -1,0 +1,46 @@
+{
+  "managedApiConnections": {
+    "azureeventgrid": {
+      "api": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/providers/Microsoft.Web/locations/westeurope/managedApis/azureeventgrid"
+      },
+      "connection": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/resourceGroups/rg-logicappslifecycle-mns/providers/Microsoft.Web/connections/azureeventgrid"
+      },
+      "connectionRuntimeUrl": "https://47e705ee2f46a8cd.12.common.logic-westeurope.azure-apihub.net/apim/azureeventgrid/505323fc7ac544b09431c640e00ab401/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('azureeventgrid-connectionKey')"
+      }
+    },
+    "azureblob": {
+      "api": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/providers/Microsoft.Web/locations/westeurope/managedApis/azureblob"
+      },
+      "connection": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/resourceGroups/rg-logicappslifecycle-mns/providers/Microsoft.Web/connections/azureblob"
+      },
+      "connectionRuntimeUrl": "https://47e705ee2f46a8cd.12.common.logic-westeurope.azure-apihub.net/apim/azureblob/df9e757e1cce4ed88feee7afcbeb7aef/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('azureblob-connectionKey')"
+      }
+    },
+    "sharepointonline": {
+      "api": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/providers/Microsoft.Web/locations/westeurope/managedApis/sharepointonline"
+      },
+      "connection": {
+        "id": "/subscriptions/52eb3891-6f09-4350-8707-4dc848cba302/resourceGroups/rg-logicappslifecycle-mns/providers/Microsoft.Web/connections/sharepointonline"
+      },
+      "connectionRuntimeUrl": "https://47e705ee2f46a8cd.12.common.logic-westeurope.azure-apihub.net/apim/sharepointonline/363f15fe626642be8aa26391d56abbd1/",
+      "authentication": {
+        "type": "Raw",
+        "scheme": "Key",
+        "parameter": "@appsetting('sharepointonline-connectionKey')"
+      }
+    }
+  }
+}
