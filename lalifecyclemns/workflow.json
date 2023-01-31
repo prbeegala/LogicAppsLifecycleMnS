@@ -54,7 +54,7 @@
             },
             "Select_Top_Matched_File_in_Destination": {
                 "type": "Compose",
-                "inputs": "@first(body('Filter_array'))",
+                "inputs": "@first(body('Filter_The_Destination_to_see_if_File_already_exists'))",
                 "runAfter": {
                     "Filter_The_Destination_to_see_if_File_already_exists": [
                         "Succeeded"
@@ -67,7 +67,7 @@
                     "and": [
                         {
                             "equals": [
-                                "@empty(body('Filter_array'))",
+                                "@empty(body('Filter_The_Destination_to_see_if_File_already_exists'))",
                                 false
                             ]
                         }
@@ -144,7 +144,8 @@
                             },
                             "filter": {
                                 "includedEventTypes": [
-                                    "Microsoft.Storage.BlobCreated"
+                                    "Microsoft.Storage.BlobCreated",
+                                    "Microsoft.Storage.BlobDeleted"
                                 ]
                             }
                         }
